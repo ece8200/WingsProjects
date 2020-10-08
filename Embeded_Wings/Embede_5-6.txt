@@ -1,0 +1,61 @@
+#include <Wire.h>
+char degree=176;
+int LED=13;
+int MOTOR=3;
+int address= 72; 
+
+void setup()
+{
+ 
+  pinMode(LED,OUTPUT);
+  pinMode(MOTOR,OUTPUT);
+  Serial.begin(9600);
+  Wire.begin(1,0);
+}
+void start_motor(){
+      digitalWrite(MOTOR,HIGH);
+    }
+    
+void stop_motor(){
+      digitalWrite(MOTOR,LOW);
+    }
+    
+void loop()
+{
+  static uint8_t tog=0;
+  static uint32_t oldtime=millis();
+  
+
+ 
+    if ( (millis()-oldtime) > 1000) {
+        oldtime = millis();
+      Wire.beginTransmission(address); //Send a request to begin communication with the device at the specified address
+
+      Wire.write(0); //Sends a bit asking for register 0, the data register of the TC74 sensor
+
+      Wire.endTransmission(); //this ends transmission of data from the arduino to the temperature sensor
+
+//this now reads the temperature from the TC74 sensor
+      Wire.requestFrom(address, 1);//this requests 1 byte from the specified address
+
+      while(Wire.available() == 0);
+      int celsius= Wire.read();
+      Serial.print("celsius : " );
+      Serial.print(celsius);
+      Serial.println(degree);
+      if (celsius >25){
+      digitalWrite(LED,HIGH);
+        Serial.print("ON");
+        
+        start_motor();
+    
+      }
+      else {
+        digitalWrite(LED,LOW);
+        stop_motor();
+        Serial.print("OFF");
+      }
+    }
+
+    
+}
